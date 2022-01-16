@@ -2,7 +2,7 @@
 
 <head>
   <title>Convolution demo</title>
-
+  <link rel="stylesheet" href="style.css">
   <script type="text/javascript" src="external/d3.min.js"></script>
   <script type="text/javascript" src="utils.js"></script>
 
@@ -16,7 +16,8 @@
   <script type="text/javascript">
     var xindex = 0;
     var yindex = 0;
-    var dindex=0;
+    var dindex = 0;
+
     var W1 = 7;
     var H1 = 7;
     var D1 = 3;
@@ -27,32 +28,41 @@
 
     var cs = 25; // cell size
 
-    var X = new U.Vol(W1, H1, D1); // input volume
-    for (var q = 0; q < X.w.length; q++) {
-      X.w[q] = Math.floor(Math.random() * 3);
-      // 0 pad with P = 1
-      for (var d = 0; d < X.depth; d++) {
-        for (var x = 0; x < X.sx; x++) {
-          for (var y = 0; y < X.sy; y++) {
-            if (x === 0 || x === (X.sx - 1) || y === 0 || y === (X.sy - 1)) {
-              X.set(x, y, d, 0);
+    var X = null;
+    var W = null;
+    var b = null;
+    var Ws = null;
+    var bs = null;
+
+
+    function init() {
+      X = new U.Vol(W1, H1, D1);// input volume
+      for (var q = 0; q < X.w.length; q++) {
+        X.w[q] = Math.floor(Math.random() * 3);
+        // 0 pad with P = 1
+        for (var d = 0; d < X.depth; d++) {
+          for (var x = 0; x < X.sx; x++) {
+            for (var y = 0; y < X.sy; y++) {
+              if (x === 0 || x === (X.sx - 1) || y === 0 || y === (X.sy - 1)) {
+                X.set(x, y, d, 0);
+              }
             }
           }
         }
       }
-    }
+      Ws = [];
+      bs = [];
 
-    var Ws = [];
-    var bs = [];
-    for (var k = 0; k < K; k++) {
-      var W = new U.Vol(F, F, D1);
-      for (var q = 0; q < W.w.length; q++) {
-        W.w[q] = Math.floor(Math.random() * 3) - 1;
+      for (var k = 0; k < K; k++) {
+        W = new U.Vol(F, F, D1);
+        for (var q = 0; q < W.w.length; q++) {
+          W.w[q] = Math.floor(Math.random() * 3) - 1;
+        }
+        Ws.push(W);
+        b = new U.Vol(1, 1, 1);
+        b.w[0] = 1 - k;
+        bs.push(b);
       }
-      Ws.push(W);
-      var b = new U.Vol(1, 1, 1);
-      b.w[0] = 1 - k;
-      bs.push(b);
     }
 
     var conv_forward = function (V, Ws, bs, stride) {
@@ -215,29 +225,29 @@
     }
 
     function printOutput(svg, V, xoff, yoff) {
-      if(xindex<V.sx)
-      if (yindex < V.sy) {
-        focusCell();
-        console.log(dindex, xindex, yindex);
-        var pad = 3;
-        var dpad = 20;
-        var gyoff = 20;
-        var xcoord = xoff + xindex * (cs + pad);
-        var ycoord = yoff + yindex * (cs + pad) + dindex * (V.sy * (cs + pad) + dpad) + gyoff;
-        svg.append('text')
-          .attr('x', xcoord + 5)
-          .attr('y', ycoord + 15)
-          .attr('font-size', 16)
-          .attr('fill', 'black')
-          .text(V.get(xindex,yindex,dindex).toFixed(0));
-          console.log(V.get(xindex,yindex,dindex));
-        yindex++;
-      }
-      else {
-        yindex = 0;
-        xindex++;
-        printOutput(svg, O, 600, yoff);
-      }
+      if (xindex < V.sx)
+        if (yindex < V.sy) {
+          focusCell();
+          console.log(dindex, xindex, yindex);
+          var pad = 3;
+          var dpad = 20;
+          var gyoff = 20;
+          var xcoord = xoff + xindex * (cs + pad);
+          var ycoord = yoff + yindex * (cs + pad) + dindex * (V.sy * (cs + pad) + dpad) + gyoff;
+          svg.append('text')
+            .attr('x', xcoord + 5)
+            .attr('y', ycoord + 15)
+            .attr('font-size', 16)
+            .attr('fill', 'black')
+            .text(V.get(xindex, yindex, dindex).toFixed(0));
+          console.log(V.get(xindex, yindex, dindex));
+          yindex++;
+        }
+        else {
+          yindex = 0;
+          xindex++;
+          printOutput(svg, O, 800, yoff);
+        }
     }
 
 
@@ -253,25 +263,25 @@
 
       for (var i = 0; i < Ws.length; i++) {
         // render weights
-        renderVol(svg, Ws[i], 270 + i * 170, yoff, '#FDD', 'Filter W' + i, 'w' + i);
+        renderVol(svg, Ws[i], 270 + i * 200, yoff, '#FDD', 'Filter W' + i, 'w' + i);
         // render biases
-        renderVol(svg, bs[i], 270 + i * 170, 350 + yoff, '#FDD', 'Bias b' + i, 'b' + i);
+        renderVol(svg, bs[i], 270 + i * 200, 600 + yoff, '#FDD', 'Bias b' + i, 'b' + i);
       }
 
       // render output
-      renderVolOutput(svg, O, 600, yoff, '#DFD', 'Output Volume', 'o');
+      renderVolOutput(svg, O, 800, yoff, '#DFD', 'Output Volume', 'o');
 
 
       // render controls
 
       svg.append('text')
-        .attr('x', 520)
+        .attr('x', 1020)
         .attr('y', 470)
         .attr('font-size', 16)
         .attr('fill', 'black')
         .text('Compute Next Value');
       svg.append('rect')
-        .attr('x', 500)
+        .attr('x', 1000)
         .attr('y', 450)
         .attr('height', 30)
         .attr('width', 200)
@@ -280,19 +290,13 @@
         .attr('stroke-width', '2')
         .attr('style', 'cursor:pointer;')
         .on('click', function () {
-          // //toggle 
-          // if(iid === -1) {
-          //   iid = setInterval(focusCell, 1000);
-          // } else {
-          //   clearInterval(iid);
-          //   iid = -1;
-          // }
+          console.log("hi");
           if (dindex < O.depth) {
             if (xindex < O.sx) {
-              printOutput(svg, O, 600, yoff);
+              printOutput(svg, O, 800, yoff);
             }
-            else{
-              xindex=0;
+            else {
+              xindex = 0;
               dindex++;
               //printOutput(svg, O, 600, yoff);
             }
@@ -303,6 +307,7 @@
     var fxg = 0;
     var fyg = 0;
     var fdg = 0;
+
     function focusCell() {
 
       // first unfocus all
@@ -404,11 +409,22 @@
 
     }
 
-    iid = -1;
+
     function start() {
+      init();
       O = conv_forward(X, Ws, bs, S);
       draw();
-      // iid = setInterval(focusCell, 1000);
+    }
+
+    function redraw() {
+      d3.select("svg").remove();
+      xindex = 0;
+      yindex = 0;
+      dindex = 0;
+      F = document.getElementById("F").value;
+      S = document.getElementById("S").value;
+      console.log(F, S);
+      start();
     }
 
   </script>
@@ -417,10 +433,24 @@
 
 </head>
 
+
+
 <body onload="start()">
 
   <div id="draw">
   </div>
+
+  <div class="input">
+    <label for="F">Filter Size</label> <br>
+    <input type="number" id="F"><br> <br>
+    <label for="S">Stride</label> <br>
+    <input type="number" id="S"> <br><br>
+    <button type="button" onclick="redraw()">Submit</button>
+  </div>
+
+  </form>
+
+
 
 </body>
 
