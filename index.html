@@ -335,7 +335,7 @@
         else {
           o_y = 0;
           o_x++;
-          printOutput(svg, O, 800, yoff);
+          printOutput(svg, O, 600, yoff);
         }
     }
 
@@ -358,19 +358,19 @@
       }
 
       // render output
-      renderVolOutput(svg, O, 800, yoff, '#DFD', 'Output Volume', 'o');
+      renderVolOutput(svg, O, 600, yoff, '#DFD', 'Output Volume', 'o');
 
 
       // render controls
 
       svg.append('text')
-        .attr('x', 1020)
+        .attr('x', 620)
         .attr('y', 470)
         .attr('font-size', 16)
         .attr('fill', 'black')
         .text('Compute Next Value');
       svg.append('rect')
-        .attr('x', 1000)
+        .attr('x', 600)
         .attr('y', 450)
         .attr('height', 30)
         .attr('width', 200)
@@ -382,7 +382,7 @@
           console.log("hi");
           if (o_d < O.depth) {
             if (o_x < O.sx) {
-              printOutput(svg, O, 800, yoff);
+              printOutput(svg, O, 600, yoff);
             }
             else {
               o_x = 0;
